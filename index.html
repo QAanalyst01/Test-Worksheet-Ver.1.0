@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Testing Worksheet</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: 20px;
+    }
+    .container {
+        max-width: 800px;
+        margin: auto;
+        padding: 20px;
+        background: #f9f9f9;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    .btn {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    #btnPass {
+        background-color: #4CAF50;
+        color: white;
+        border: 1px solid #4CAF50;
+    }
+    #btnFail {
+        background-color: #f44336;
+        color: white;
+        border: 1px solid #f44336;
+    }
+    .btn:hover {
+        opacity: 0.9;
+    }
+    .question {
+        margin-bottom: 20px;
+        padding: 10px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    .question h2 {
+        margin-top: 0;
+    }
+    .actions {
+        margin-top: 10px;
+    }
+    .actions button {
+        margin-right: 10px;
+    }
+    .summary {
+        margin-top: 20px;
+        border-top: 1px solid #ccc;
+        padding-top: 10px;
+    }
+    .summary h3 {
+        margin-top: 0;
+    }
+    .summary-list-item {
+        margin-bottom: 5px;
+    }
+    .pass {
+        color: #4CAF50;
+    }
+    .fail {
+        color: #f44336;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>QA Testing Worksheet</h1>
+    <div id="question-container">
+        <!-- Questions will be dynamically added here -->
+    </div>
+    <div id="actions" class="actions" style="display: none;">
+        <button id="btnPass" class="btn" onclick="recordResult(true)">Pass</button>
+        <button id="btnFail" class="btn" onclick="recordResult(false)">Fail</button>
+    </div>
+    <div id="summary" class="summary" style="display: none;">
+        <h3>Summary of Answers</h3>
+        <ul id="summary-list"></ul>
+    </div>
+</div>
+
+<script>
+    // Questions array organized by segments
+    const questions = [
+        // Landing page section
+        "Step 1. Load site with http:// to ensure https:// redirect",
+        "Step 2. Check all of the links from the landing page (Court information box, terms and conditions, etc.) Check for any broken links or missing images.",
+        "Step 3. Verify that all icons correctly redirect to their intended pages and do not lead to broken links (e.g., state logo, support [question mark icon], landing page icon, etc.).",
+        "Step 4. Click on support chat and type 'How to file' (bot should provide you articles and an option to get in touch)",
+        "Step 5. Register for a new firm account (go to mailinator.com to create a fake email address) Note: Ensure you receive an activation link via email. Try to sign in as the new user without activating it first to confirm that login is not possible. Then, proceed to activate your account. Click the activation link and make sure it doesn't lead to a broken page. It should take you to the Activation Link page with a Sign In button. Click Sign In and ensure it redirects to the correct site.",
+        "Step 6. Register for a new individual account (go to mailinator.com to create a fake email address) Note: Ensure you receive an activation link via email. Try to sign in as the new user without activating it first to confirm that login is not possible. Then, proceed to activate your account. Click the activation link and make sure it doesn't lead to a broken page. It should take you to the Activation Link page with a Sign In button. Click Sign In and ensure it redirects to the correct site.",
+        // Individual account section
+        "Step 7. (Individual account), reset your password using the link provided on the landing page (accessible via the 'Forgot Password' link). Please ensure you receive the password reset link via email.",
+        "Step 8. (Individual account), successfully update address information.",
+        "Step 9. (Individual account), under My service contacts: Add, edit, and delete a service contact.",
+        "Step 10. (Individual account), while in the Profile section, test all available options to ensure that you can save any changes without encountering error messages. (This includes Profile Information, Change Password, Email Notifications, Preferences, etc.)",
+        "Step 11. (Individual account), delete your Account.",
+        // Firm account (Firm Admin) section
+        "Step 12. (Firm admin) Check the icon with two capital letters located in the upper right corner of the homepage and ensure that all buttons (Profile, Change Account, Sign Out) are functioning properly.",
+        "Step 13. (Firm admin) While in the User Profile section of Firm account, test all available options to ensure that you can save any changes without encountering error messages. (This includes Profile Information, Change Password, Email Notifications, Preferences, etc.)",
+        "14. Test all icons on the homepage of the Firm account to ensure they redirect to the correct pages (e.g., State logo, support icon, etc.).",
+        "15. Click on the three-line menu icon/Actions button on the Firm account and select 'Service Contacts.' Select 'Add Contact' and fill out the form with the first and last name, email address, and administrative email(s). Afterward, click 'Save.' Once the contact is saved, select 'Edit' to make any necessary changes, then click 'Save' again. Repeat this process using both Google Chrome and Mozilla Firefox browsers.",
+        "16. Create a Firm User with a 'Filer' role and verify that they receive both their activation and password reset links via email.",
+        "17. Create another Firm User with a 'Filer' and 'Criminal Filing Filer' role and click 'Edit' beside the role and select 'System' and click 'Done' and 'Save'.",
+        "18. Make a Firm Attorney and double-check that their bar number is approved. (Note: You can find the necessary number for each state on the attorney numbers tab in this file).",
+        "19. Add a CC payment account.",
+        "20. Create a Waiver payment account. After saving, click 'Edit' to change the account name, then save again.",
+        "21. Create two templates. Template (1) for a new case, Template (2) for existing case.",
+        "22. Make sure the filter field functions properly on the Firm account. Test all fields and buttons.",
+        "23. Edit/modify template (1) on the Firm account.",
+        "24. Delete template (2) on the Firm account.",
+        "25. Search for an existing case using a case number on the Firm account. Test the 're:Search' button if available. (Note: You can find the necessary case number and court location for each state on the test cases tab in this file).",
+        "26. Look up an existing case using the name of a party involved on the Firm account. (Note: You can find the party's name from the case results in step 21 and use that information to test this step).",
+        "27. Bookmark the existing case on the Firm account.",
+        "28. Add a service contact to an existing case from the case results on the Firm account. Test the options: 'Add New Contact,' 'Add Me,' and 'Firm List.' (Please note: For the 'Add New Contact' option, after saving, click 'Edit' to make modifications, then save again.)",
+        // Firm User Steps section
+        "29. User with Admin Privileges: Edit/Modify user information. Send a reset password for a user. Change a user's roles. Add a user as a service contact. Delete a user.",
+        "30. User 'WITHOUT' Admin Privileges: Add a service contact. Edit/Modify the newly added service contact. Delete service contact.",
+        // Efiling Steps section
+        "31. Perform the following actions using a Google Chrome browser: Begin by creating a new draft (Start A New Case). Fill out the Case Information page. Choose 'Supreme Court' for the court location and Civil /Civil - Other civil for the remaining fields. Proceed to the Parties page and provide the necessary details for the first party. Navigate to the filings page, upload a lead document (with sensitive information such as SSN). Click the Auto-Redact button next to the lead document field and ensure that sensitive information in the uploaded document is auto-redacted. Click 'Edit Redactions' to verify. Manually edit the redactions as needed, then click 'Save and Close.' Click 'Edit Redactions' again to ensure the changes were saved. Click 'Save and Close' once more. Finally, remove the redaction. Click on the state logo icon located on the upper left corner. Navigate to the draft filing section and ensure the draft is visible, then delete it.",
+        "32. Perform the following actions using a Mozilla Firefox browser: Begin by creating a new draft (Start A New Case). Fill out the Case Information page. Proceed to the Parties page and provide the necessary details for the first party. Navigate to the filings page, upload a lead document (with sensitive information such as SSN). Click the Auto-Redact button next to the lead document field and ensure that sensitive information in the uploaded document is auto-redacted. Click 'Edit Redactions' to verify. Manually edit the redactions as needed, then click 'Save and Close.' Click 'Edit Redactions' again to ensure the changes were saved. Click 'Save and Close' once more. Finally, remove the redaction. Click on the state logo icon located on the upper left corner. Navigate to the draft filing section and ensure the draft is visible, then delete it.",
+        "33. Perform the following actions using an Apple Safari browser: Begin by creating a new draft (Start A New Case). Fill out the Case Information page. Proceed to the Parties page and provide the necessary details for the first party. Navigate to the filings page, upload a lead document (with sensitive information such as SSN). Click the Auto-Redact button next to the lead document field and ensure that sensitive information in the uploaded document is auto-redacted. Click 'Edit Redactions' to verify. Manually edit the redactions as needed, then click 'Save and Close.' Click 'Edit Redactions' again to ensure the changes were saved. Click 'Save and Close' once more. Finally, remove the redaction. Click on the state logo icon located on the upper left corner. Navigate to the draft filing section and ensure the draft is visible, then delete it."
+    ];
+
+    // Current question index
+    let currentQuestionIndex = 0;
+
+    // Function to display the current question
+    function displayQuestion() {
+        const questionContainer = document.getElementById('question-container');
+        questionContainer.innerHTML = '';
+        
+        const questionElement = document.createElement('div');
+        questionElement.classList.add('question');
+        
+        const questionTitle = document.createElement('h2');
+        questionTitle.textContent = `Question ${currentQuestionIndex + 1}`;
+        
+        const questionText = document.createElement('p');
+        questionText.textContent = questions[currentQuestionIndex];
+        
+        questionElement.appendChild(questionTitle);
+        questionElement.appendChild(questionText);
+        questionContainer.appendChild(questionElement);
+
+        document.getElementById('actions').style.display = 'block';
+    }
+
+    // Function to record the result of the question
+    function recordResult(passed) {
+        const summaryList = document.getElementById('summary-list');
+        const listItem = document.createElement('li');
+        
+        if (passed) {
+            listItem.textContent = `Question ${currentQuestionIndex + 1}: Pass`;
+            listItem.classList.add('pass');
+        } else {
+            listItem.textContent = `Question ${currentQuestionIndex + 1}: Fail`;
+            listItem.classList.add('fail');
+        }
+        
+        summaryList.appendChild(listItem);
+        
+        currentQuestionIndex++;
+
+        if (currentQuestionIndex < questions.length) {
+            displayQuestion();
+        } else {
+            showSummary();
+        }
+    }
+
+    // Function to show the summary of answers
+    function showSummary() {
+        document.getElementById('question-container').style.display = 'none';
+        document.getElementById('actions').style.display = 'none';
+        document.getElementById('summary').style.display = 'block';
+    }
+
+    // Initial display of first question
+    displayQuestion();
+</script>
+</body>
+</html>
